@@ -1,98 +1,132 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '@/constants/Colors';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 export default function ChatScreen() {
   const [messages, setMessages] = useState([
-    { id: '1', text: 'Hi! Thanks for reaching out. Yes, the coffee grinder is still available.', sender: 'other' },
-    { id: '2', text: 'Hey Sarah! That’s perfect. I have three medium-sized pots ready for trade.', sender: 'me' },
-    { id: '3', text: 'Those look lovely! Would you like to meet up this weekend?', sender: 'other' },
+    { id: 1, text: 'Hi! Thanks for reaching out. Yes, the coffee grinder is still available.', sender: 'other' },
+    { id: 2, text: 'Hey Sarah! That’s perfect. I have three medium-sized pots ready for trade.', sender: 'me' },
+    { id: 3, text: 'Those look lovely! Would you like to meet up this weekend?', sender: 'other' },
   ]);
   const [inputText, setInputText] = useState('');
-  const scrollViewRef = useRef<ScrollView>(null);
 
-  const handleSend = () => {
-    if (inputText.trim() === '') return;
-    
-    const newMessage = {
-      id: Date.now().toString(),
-      text: inputText.trim(),
-      sender: 'me',
-    };
-
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
-    setInputText('');
-
-    // নতুন মেসেজ পাঠালে স্ক্রিন নিচে স্ক্রোল হবে
-    setTimeout(() => {
-      scrollViewRef.current?.scrollToEnd({ animated: true });
-    }, 100);
+  const sendMessage = () => {
+    if (inputText.trim()) {
+      setMessages([...messages, { id: Date.now(), text: inputText, sender: 'me' }]);
+      setInputText('');
+    }
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={styles.container} 
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      {/* হেডার */}
+    <View style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
-        <Ionicons name="person-circle-outline" size={36} color={Colors.primary} />
-        <View style={{ marginLeft: 10 }}>
-          <Text style={styles.chatName}>Marcus H.</Text>
-          <Text style={styles.statusText}>Active now</Text>
+        <View style={styles.avatar}>
+          <Ionicons name="person" size={20} color="#FFFFFF" />
+        </View>
+        <View>
+          <Text style={styles.userName}>Marcus H.</Text>
+          <Text style={styles.userStatus}>Active now</Text>
         </View>
       </View>
 
-      {/* চ্যাট মেসেজ এলাকা */}
-      <ScrollView 
-        ref={scrollViewRef}
-        style={styles.chatArea} 
-        showsVerticalScrollIndicator={false}
-        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
-      >
+      {/* Messages */}
+      <ScrollView style={styles.messageList} contentContainerStyle={{ paddingVertical: 16 }}>
         {messages.map((msg) => (
           <View
             key={msg.id}
-            style={msg.sender === 'me' ? styles.sentBubble : styles.receivedBubble}
+            style={[
+              styles.messageBubble,
+              msg.sender === 'me' ? styles.myMessage : styles.otherMessage,
+            ]}
           >
-            <Text style={msg.sender === 'me' ? styles.sentText : styles.receivedText}>
-              {msg.text}
-            </Text>
+            <Text style={styles.messageText}>{msg.text}</Text>
           </View>
         ))}
       </ScrollView>
 
-      {/* ইনপুট বার */}
-      <View style={styles.inputBar}>
+      {/* Input Box */}
+      <View style={styles.inputContainer}>
         <TextInput
-          placeholder="Type a message..."
-          placeholderTextColor={Colors.textMuted}
           style={styles.input}
+          placeholder="Type a message..."
+          placeholderTextColor="#9CA3AF"
           value={inputText}
           onChangeText={setInputText}
-          multiline={false}
-          onSubmitEditing={handleSend}
         />
-        <TouchableOpacity style={styles.sendBtn} onPress={handleSend} activeOpacity={0.7}>
-          <Ionicons name="send" size={16} color="#FFF" />
+        <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
+          <Ionicons name="send" size={18} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background, paddingTop: 50 },
-  header: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 20, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: Colors.border },
-  chatName: { fontSize: 16, fontWeight: 'bold', color: Colors.textDark },
-  statusText: { fontSize: 11, color: Colors.primary },
-  chatArea: { flex: 1, paddingHorizontal: 20, paddingTop: 16 },
-  receivedBubble: { backgroundColor: '#E0E4D7', padding: 12, borderRadius: 16, borderBottomLeftRadius: 4, alignSelf: 'flex-start', maxWidth: '80%', marginBottom: 12 },
-  receivedText: { color: Colors.textDark, fontSize: 14 },
-  sentBubble: { backgroundColor: Colors.primary, padding: 12, borderRadius: 16, borderBottomRightRadius: 4, alignSelf: 'flex-end', maxWidth: '80%', marginBottom: 12 },
-  sentText: { color: '#FFF', fontSize: 14 },
-  inputBar: { flexDirection: 'row', alignItems: 'center', padding: 12, backgroundColor: Colors.cardBg, borderTopWidth: 1, borderTopColor: Colors.border, marginBottom: 10 },
-  input: { flex: 1, fontSize: 14, color: Colors.textDark, paddingHorizontal: 12, height: 40 },
-  sendBtn: { backgroundColor: Colors.primary, padding: 10, borderRadius: 20, marginLeft: 8, justifyContent: 'center', alignItems: 'center' },
+  container: { flex: 1, backgroundColor: '#121212', paddingTop: 50 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#1E1E1E',
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#374151',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  userName: { color: '#FFFFFF', fontSize: 16, fontWeight: 'bold' },
+  userStatus: { color: '#10B981', fontSize: 12 },
+  messageList: { flex: 1, paddingHorizontal: 16 },
+  messageBubble: {
+    maxWidth: '80%',
+    padding: 12,
+    borderRadius: 16,
+    marginBottom: 12,
+  },
+  otherMessage: {
+    backgroundColor: '#1E1E1E',
+    alignSelf: 'flex-start',
+    borderBottomLeftRadius: 4,
+  },
+  myMessage: {
+    backgroundColor: '#14532D',
+    alignSelf: 'flex-end',
+    borderBottomRightRadius: 4,
+  },
+  messageText: { color: '#FFFFFF', fontSize: 14, lineHeight: 20 },
+  inputContainer: {
+    flexDirection: 'row',
+    padding: 16,
+    backgroundColor: '#1E1E1E',
+    alignItems: 'center',
+  },
+  input: {
+    flex: 1,
+    color: '#FFFFFF',
+    fontSize: 14,
+    maxHeight: 100,
+  },
+  sendButton: {
+    backgroundColor: '#15803D',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8,
+  },
 });

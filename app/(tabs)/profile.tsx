@@ -1,25 +1,32 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Modal, TextInput, Image } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Image,
+  Switch,
+  Alert,
+} from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import * as ImagePicker from 'expo-image-picker';
-import { Colors } from '@/constants/Colors';
+import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
-  const [name, setName] = useState('Sarah Jenkins');
-  const [location, setLocation] = useState('Portland, OR');
-  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const router = useRouter();
 
-  // Modal স্টেট
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [tempName, setTempName] = useState(name);
-  const [tempLocation, setTempLocation] = useState(location);
+  const [profileImage, setProfileImage] = useState(
+    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400'
+  );
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // গ্যালারি থেকে ছবি সিলেক্ট করার ফাংশন
+  // Picture Change Function
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permissionResult.granted) {
-      Alert.alert('Permission Required', 'Permission to access camera roll is required!');
+      Alert.alert('Permission Required', 'Permission to access gallery is required!');
       return;
     }
 
@@ -35,191 +42,237 @@ export default function ProfileScreen() {
     }
   };
 
-  const handleOpenEditModal = () => {
-    setTempName(name);
-    setTempLocation(location);
-    setIsModalVisible(true);
+  // Edit Profile Action
+  const handleEditProfile = () => {
+    Alert.alert('Edit Profile', 'Edit Profile button clicked!');
   };
 
-  const handleSaveProfile = () => {
-    setName(tempName);
-    setLocation(tempLocation);
-    setIsModalVisible(false);
-    Alert.alert('Success', 'Profile updated successfully!');
+  // Settings Action (Navigates to settings screen)
+  const handleSettings = () => {
+    router.push('/settings');
+  };
+
+  // Logout Action
+  const handleLogout = () => {
+    Alert.alert('Logout', 'Are you sure you want to log out?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: () => {
+          Alert.alert('Logged Out', 'You have been logged out.');
+        },
+      },
+    ]);
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* ১. প্রোফাইল হেডার ও পিকচার */}
+    <ScrollView
+      style={[styles.container, isDarkMode && { backgroundColor: '#121212' }]}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Top Header Navigation */}
+      <View style={styles.headerNav}>
+        <Ionicons name="location-outline" size={22} color={isDarkMode ? '#A7F3D0' : '#2D4A22'} />
+        <Text style={[styles.headerBrand, isDarkMode && { color: '#FFFFFF' }]}>EcoTrade</Text>
+        <Image source={{ uri: profileImage }} style={styles.topAvatar} />
+      </View>
+
+      {/* Main Profile Info */}
       <View style={styles.profileHeader}>
-        <TouchableOpacity style={styles.avatarContainer} onPress={pickImage} activeOpacity={0.8}>
-          {profileImage ? (
-            <Image source={{ uri: profileImage }} style={styles.avatarImage} />
-          ) : (
-            <View style={styles.avatarPlaceholder}>
-              <Ionicons name="person" size={40} color={Colors.primary} />
-            </View>
-          )}
+        <TouchableOpacity style={styles.avatarContainer} onPress={pickImage}>
+          <View style={styles.avatarBorder}>
+            <Image source={{ uri: profileImage }} style={styles.avatar} />
+          </View>
           <View style={styles.cameraBadge}>
-            <Ionicons name="camera" size={14} color="#FFF" />
+            <Ionicons name="camera" size={14} color="#FFFFFF" />
           </View>
         </TouchableOpacity>
 
-        <Text style={styles.name}>{name}</Text>
-        <Text style={styles.location}>{location}</Text>
+        <View style={styles.nameRow}>
+          <Text style={[styles.name, isDarkMode && { color: '#FFFFFF' }]}>Sarah Jenkins</Text>
+          <View style={styles.verifiedBadge}>
+            <Ionicons name="checkmark-circle-outline" size={12} color="#2D4A22" />
+            <Text style={styles.verifiedText}>VERIFIED</Text>
+          </View>
+        </View>
 
-        <TouchableOpacity 
-          style={styles.editBtn} 
-          onPress={handleOpenEditModal}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="pencil" size={14} color="#FFF" style={{ marginRight: 6 }} />
+        <Text style={styles.location}>📍 Portland, OR</Text>
+        <Text style={[styles.bio, isDarkMode && { color: '#A8A29E' }]}>
+          Avid gardener, vintage clothing enthusiast, and believer in the circular economy.
+        </Text>
+
+        <TouchableOpacity style={styles.editBtn} onPress={handleEditProfile}>
+          <Ionicons name="pencil" size={14} color="#FFFFFF" style={{ marginRight: 6 }} />
           <Text style={styles.editBtnText}>Edit Profile</Text>
         </TouchableOpacity>
       </View>
 
-      {/* ২. ইমপ্যাক্ট মেট্রিক্স কার্ড */}
-      <View style={styles.impactBox}>
-        <Text style={styles.boxTitle}>Sustainability Impact</Text>
-        <View style={styles.statsRow}>
-          <TouchableOpacity 
-            style={styles.statCard}
-            onPress={() => Alert.alert('Items Diverted', 'You have successfully diverted 12 items from landfills!')}
-          >
-            <Text style={styles.statNumber}>12</Text>
-            <Text style={styles.statLabel}>Items Diverted</Text>
-          </TouchableOpacity>
+      {/* Account Settings Menu */}
+      <Text style={[styles.sectionTitle, isDarkMode && { color: '#FFFFFF' }]}>
+        Account & Settings
+      </Text>
 
-          <TouchableOpacity 
-            style={styles.statCard}
-            onPress={() => Alert.alert('CO2 Offset', 'Your eco trades reduced approximately 45 kg of CO2 emissions.')}
-          >
-            <Text style={styles.statNumber}>45 kg</Text>
-            <Text style={styles.statLabel}>CO2 Offset</Text>
-          </TouchableOpacity>
+      <View style={[styles.menuContainer, isDarkMode && { backgroundColor: '#1E1E1E', borderColor: '#333' }]}>
+        {/* Dark Mode Toggle */}
+        <View style={styles.menuItem}>
+          <View style={styles.menuLeft}>
+            <Ionicons name="moon-outline" size={20} color={isDarkMode ? '#A7F3D0' : '#2D4A22'} />
+            <Text style={[styles.menuText, isDarkMode && { color: '#FFFFFF' }]}>Dark Mode</Text>
+          </View>
+          <Switch
+            value={isDarkMode}
+            onValueChange={(value) => setIsDarkMode(value)}
+            trackColor={{ false: '#D4D2C3', true: '#2D4A22' }}
+            thumbColor="#FFFFFF"
+          />
         </View>
-      </View>
 
-      {/* ৩. ব্যাজ কার্ড */}
-      <TouchableOpacity 
-        style={styles.badgeCard}
-        onPress={() => Alert.alert('Top Contributor', 'You are in the top 5% of active traders in your neighborhood!')}
-        activeOpacity={0.9}
-      >
-        <Ionicons name="ribbon-outline" size={28} color="#FFF" />
-        <View style={{ marginLeft: 12 }}>
-          <Text style={styles.badgeTitle}>Top Contributor</Text>
-          <Text style={styles.badgeSub}>Top 5% in your neighborhood</Text>
-        </View>
-      </TouchableOpacity>
+        {/* Settings Button */}
+        <TouchableOpacity style={styles.menuItem} onPress={handleSettings}>
+          <View style={styles.menuLeft}>
+            <Ionicons name="settings-outline" size={20} color={isDarkMode ? '#A7F3D0' : '#2D4A22'} />
+            <Text style={[styles.menuText, isDarkMode && { color: '#FFFFFF' }]}>Settings</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#78716C" />
+        </TouchableOpacity>
 
-      {/* ৪. মাই ইনভেন্টরি সেকশন */}
-      <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>My Inventory</Text>
-        <TouchableOpacity onPress={() => Alert.alert('Add Item', 'Add new item form will open.')}>
-          <Text style={styles.addLink}>+ Add New</Text>
+        {/* Logout Button */}
+        <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]} onPress={handleLogout}>
+          <View style={styles.menuLeft}>
+            <Ionicons name="log-out-outline" size={20} color="#DC2626" />
+            <Text style={[styles.menuText, { color: '#DC2626' }]}>Logout</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color="#DC2626" />
         </TouchableOpacity>
       </View>
 
-      <View style={styles.menuCard}>
-        <View style={styles.inventoryItem}>
-          <Ionicons name="flower-outline" size={22} color={Colors.primary} />
-          <Text style={styles.inventoryText}>Monstera Plant</Text>
-          <Text style={styles.statusActive}>Available</Text>
+      {/* Sustainability Impact Section */}
+      <Text style={[styles.sectionTitle, isDarkMode && { color: '#FFFFFF' }]}>
+        Sustainability Impact
+      </Text>
+
+      {/* Landfill Diverted Card */}
+      <View style={styles.impactMainCard}>
+        <View style={styles.cardHeaderRow}>
+          <Ionicons name="sync-outline" size={18} color="#2D4A22" />
+          <Text style={styles.cardHeaderLabel}>LANDFILL DIVERTED</Text>
         </View>
-        <View style={styles.divider} />
-        <View style={styles.inventoryItem}>
-          <Ionicons name="book-outline" size={22} color={Colors.primary} />
-          <Text style={styles.inventoryText}>Design Books Set</Text>
-          <Text style={styles.statusActive}>Available</Text>
-        </View>
-      </View>
+        <Text style={styles.impactMainValue}>
+          12 <Text style={styles.impactUnit}>items</Text>
+        </Text>
 
-      {/* ৫. অপশন ও সেটিংস মেনু */}
-      <Text style={[styles.sectionTitle, { marginTop: 16 }]}>Account & Options</Text>
-
-      <View style={styles.menuCard}>
-        <TouchableOpacity 
-          style={styles.menuRow}
-          onPress={() => Alert.alert('Trade History', 'You have completed 8 successful trades!')}
-        >
-          <Ionicons name="time-outline" size={20} color={Colors.textDark} />
-          <Text style={styles.menuText}>Trade History</Text>
-          <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
-        </TouchableOpacity>
-
-        <View style={styles.divider} />
-
-        <TouchableOpacity 
-          style={styles.menuRow}
-          onPress={() => Alert.alert('Settings', 'Settings screen coming soon!')}
-        >
-          <Ionicons name="settings-outline" size={20} color={Colors.textDark} />
-          <Text style={styles.menuText}>Settings & Privacy</Text>
-          <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
-        </TouchableOpacity>
-
-        <View style={styles.divider} />
-
-        <TouchableOpacity 
-          style={styles.menuRow}
-          onPress={() => Alert.alert('Log Out', 'Are you sure you want to log out?', [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Log Out', style: 'destructive' }
-          ])}
-        >
-          <Ionicons name="log-out-outline" size={20} color="#D32F2F" />
-          <Text style={[styles.menuText, { color: '#D32F2F' }]}>Log Out</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Edit Profile Modal */}
-      <Modal
-        visible={isModalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setIsModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Edit Profile</Text>
-
-            <Text style={styles.inputLabel}>Name</Text>
-            <TextInput
-              style={styles.input}
-              value={tempName}
-              onChangeText={setTempName}
-              placeholder="Enter name"
-              placeholderTextColor={Colors.textMuted}
-            />
-
-            <Text style={styles.inputLabel}>Location</Text>
-            <TextInput
-              style={styles.input}
-              value={tempLocation}
-              onChangeText={setTempLocation}
-              placeholder="Enter location"
-              placeholderTextColor={Colors.textMuted}
-            />
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity 
-                style={[styles.modalBtn, styles.cancelBtn]} 
-                onPress={() => setIsModalVisible(false)}
-              >
-                <Text style={styles.cancelBtnText}>Cancel</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity 
-                style={[styles.modalBtn, styles.saveBtn]} 
-                onPress={handleSaveProfile}
-              >
-                <Text style={styles.saveBtnText}>Save</Text>
-              </TouchableOpacity>
+        <View style={styles.progressCircleContainer}>
+          <View style={styles.outerCircle}>
+            <View style={styles.innerCircle}>
+              <Ionicons name="leaf-outline" size={22} color="#2D4A22" />
             </View>
           </View>
         </View>
-      </Modal>
+      </View>
+
+      {/* Stats Row */}
+      <View style={styles.statsRow}>
+        <View style={styles.statMiniCard}>
+          <View style={styles.cardHeaderRow}>
+            <Ionicons name="cloud-outline" size={14} color="#2D4A22" />
+            <Text style={styles.miniCardLabel}>CO2 Offset</Text>
+          </View>
+          <Text style={styles.statMiniValue}>
+            45 <Text style={styles.statMiniUnit}>kg</Text>
+          </Text>
+          <View style={styles.progressBarBg}>
+            <View style={styles.progressBarFill} />
+          </View>
+        </View>
+
+        <View style={styles.statMiniCard}>
+          <View style={styles.cardHeaderRow}>
+            <Ionicons name="hand-left-outline" size={14} color="#7C2D12" />
+            <Text style={[styles.miniCardLabel, { color: '#7C2D12' }]}>Swaps</Text>
+          </View>
+          <Text style={styles.statMiniValue}>8</Text>
+          <Text style={styles.subText}>Total completed</Text>
+        </View>
+      </View>
+
+      {/* Top Contributor Banner */}
+      <View style={styles.contributorBanner}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.bannerTitle}>Top Contributor</Text>
+          <Text style={styles.bannerSubtitle}>Top 5% in your neighborhood</Text>
+        </View>
+        <Ionicons name="ribbon-outline" size={28} color="#FFFFFF" />
+      </View>
+
+      {/* Active Listings Section */}
+      <View style={styles.sectionHeaderRow}>
+        <Text style={[styles.sectionTitle, isDarkMode && { color: '#FFFFFF' }]}>Active Listings</Text>
+        <TouchableOpacity>
+          <Text style={styles.viewAllText}>View All</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.horizontalList}>
+        <View style={styles.listingCard}>
+          <View style={styles.listingImageHolder}>
+            <Ionicons name="flower-outline" size={32} color="#2D4A22" />
+            <View style={styles.tagBadge}>
+              <Text style={styles.tagText}>Garden</Text>
+            </View>
+          </View>
+          <Text style={styles.listingTitle} numberOfLines={1}>Vintage Ceramic P...</Text>
+          <Text style={styles.listingSubtitle} numberOfLines={2}>
+            Excellent condition, rarely used.
+          </Text>
+          <TouchableOpacity style={styles.cardActionBtn}>
+            <Text style={styles.cardActionBtnText}>Edit</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.listingCard}>
+          <View style={styles.listingImageHolder}>
+            <Ionicons name="shirt-outline" size={32} color="#2D4A22" />
+            <View style={styles.tagBadge}>
+              <Text style={styles.tagText}>Clothing</Text>
+            </View>
+          </View>
+          <Text style={styles.listingTitle} numberOfLines={1}>Hand-Knit Sweate...</Text>
+          <Text style={styles.listingSubtitle} numberOfLines={2}>
+            Size M, wool blend.
+          </Text>
+          <TouchableOpacity style={styles.cardActionBtn}>
+            <Text style={styles.cardActionBtnText}>Edit</Text>
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity style={[styles.listingCard, styles.addNewCard]}>
+          <View style={styles.addCircle}>
+            <Ionicons name="add" size={24} color="#2D4A22" />
+          </View>
+          <Text style={styles.addNewText}>List New Item</Text>
+        </TouchableOpacity>
+      </ScrollView>
+
+      {/* Recently Swapped Section */}
+      <Text style={[styles.sectionTitle, isDarkMode && { color: '#FFFFFF' }]}>Recently Swapped</Text>
+      <View style={styles.recentItemCard}>
+        <View style={styles.recentImageHolder}>
+          <Ionicons name="bulb-outline" size={24} color="#2D4A22" />
+        </View>
+        <View style={{ flex: 1, marginLeft: 12 }}>
+          <Text style={styles.recentTitle}>Modern Desk Lamp</Text>
+          <Text style={styles.recentSubtitle}>Traded with @mark_t</Text>
+        </View>
+        <View style={{ alignItems: 'flex-end' }}>
+          <View style={styles.completedBadge}>
+            <Text style={styles.completedBadgeText}>Completed</Text>
+          </View>
+          <Text style={styles.timeAgoText}>2 days ago</Text>
+        </View>
+      </View>
+
+      <View style={{ height: 40 }} />
     </ScrollView>
   );
 }
@@ -227,238 +280,384 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#FBF9EE',
     paddingTop: 50,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
+  },
+  headerNav: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  headerBrand: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#2D4A22',
+  },
+  topAvatar: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
   },
   profileHeader: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   avatarContainer: {
     position: 'relative',
-    marginBottom: 10,
+    marginBottom: 12,
   },
-  avatarPlaceholder: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#E0E4D7',
-    justifyContent: 'center',
-    alignItems: 'center',
+  avatarBorder: {
+    padding: 3,
+    borderRadius: 55,
+    borderWidth: 2,
+    borderColor: '#E2E8F0',
   },
-  avatarImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+  avatar: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
   },
   cameraBadge: {
     position: 'absolute',
-    bottom: 0,
-    right: 0,
-    backgroundColor: Colors.buttonBrown,
+    bottom: 2,
+    right: 2,
+    backgroundColor: '#2D4A22',
     padding: 6,
-    borderRadius: 12,
+    borderRadius: 15,
     borderWidth: 2,
-    borderColor: Colors.background,
+    borderColor: '#FBF9EE',
+  },
+  nameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   name: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: Colors.textDark,
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#1C1917',
+  },
+  verifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#E2E8F0',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 10,
+    gap: 3,
+  },
+  verifiedText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#2D4A22',
   },
   location: {
-    fontSize: 12,
-    color: Colors.textMuted,
-    marginVertical: 2,
+    color: '#78716C',
+    fontSize: 13,
+    marginTop: 4,
+  },
+  bio: {
+    color: '#57534E',
+    textAlign: 'center',
+    marginVertical: 10,
+    fontSize: 13,
+    lineHeight: 18,
+    paddingHorizontal: 10,
   },
   editBtn: {
     flexDirection: 'row',
-    backgroundColor: Colors.buttonBrown,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 10,
     alignItems: 'center',
+    backgroundColor: '#4A1D13',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginTop: 4,
   },
   editBtnText: {
-    color: '#FFF',
-    fontSize: 12,
+    color: '#FFFFFF',
     fontWeight: '600',
-  },
-  impactBox: {
-    backgroundColor: Colors.cardBg,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    marginBottom: 16,
-  },
-  boxTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: Colors.textDark,
-    marginBottom: 12,
-  },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  statCard: {
-    width: '48%',
-    backgroundColor: '#F3F4EE',
-    padding: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.primary,
-  },
-  statLabel: {
-    fontSize: 11,
-    color: Colors.textMuted,
-    marginTop: 2,
-  },
-  badgeCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.primary,
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 20,
-  },
-  badgeTitle: {
-    color: '#FFF',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  badgeSub: {
-    color: '#A3B899',
-    fontSize: 12,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
+    fontSize: 13,
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: Colors.textDark,
-    marginBottom: 8,
+    fontWeight: '700',
+    color: '#1C1917',
+    marginBottom: 12,
   },
-  addLink: {
-    fontSize: 13,
-    color: Colors.primary,
-    fontWeight: '600',
-  },
-  menuCard: {
-    backgroundColor: Colors.cardBg,
-    borderRadius: 16,
+  menuContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    marginBottom: 24,
     borderWidth: 1,
-    borderColor: Colors.border,
-    marginBottom: 20,
+    borderColor: '#E7E5E4',
   },
-  inventoryItem: {
+  menuItem: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  inventoryText: {
-    flex: 1,
-    marginLeft: 12,
-    fontSize: 14,
-    fontWeight: '500',
-    color: Colors.textDark,
-  },
-  statusActive: {
-    fontSize: 11,
-    color: Colors.primary,
-    fontWeight: '600',
-  },
-  menuRow: {
-    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F5F5F4',
+  },
+  menuLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   menuText: {
-    flex: 1,
-    marginLeft: 12,
     fontSize: 14,
-    fontWeight: '500',
-    color: Colors.textDark,
+    fontWeight: '600',
+    color: '#1C1917',
   },
-  divider: {
-    height: 1,
-    backgroundColor: Colors.border,
+  impactMainCard: {
+    backgroundColor: '#EBE9D8',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
   },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+  cardHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  cardHeaderLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#2D4A22',
+  },
+  impactMainValue: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#1C1917',
+    marginTop: 6,
+  },
+  impactUnit: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#57534E',
+  },
+  progressCircleContainer: {
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  outerCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 8,
+    borderColor: '#D4D2C3',
+    borderTopColor: '#2D4A22',
+    borderRightColor: '#2D4A22',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
   },
-  modalContent: {
-    width: '100%',
-    backgroundColor: Colors.cardBg,
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: Colors.border,
+  innerCircle: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#EBE9D8',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.textDark,
-    marginBottom: 16,
-  },
-  inputLabel: {
-    fontSize: 12,
-    color: Colors.textMuted,
-    marginBottom: 6,
-  },
-  input: {
-    backgroundColor: Colors.background,
-    borderColor: Colors.border,
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    color: Colors.textDark,
-    fontSize: 14,
-    marginBottom: 14,
-  },
-  modalButtons: {
+  statsRow: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: 10,
+    gap: 12,
+    marginBottom: 12,
   },
-  modalBtn: {
-    paddingVertical: 8,
+  statMiniCard: {
+    flex: 1,
+    backgroundColor: '#EBE9D8',
+    borderRadius: 14,
+    padding: 14,
+  },
+  miniCardLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#2D4A22',
+  },
+  statMiniValue: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#1C1917',
+    marginVertical: 4,
+  },
+  statMiniUnit: {
+    fontSize: 14,
+    fontWeight: '400',
+  },
+  subText: {
+    fontSize: 11,
+    color: '#78716C',
+  },
+  progressBarBg: {
+    height: 6,
+    backgroundColor: '#D4D2C3',
+    borderRadius: 3,
+    marginTop: 8,
+  },
+  progressBarFill: {
+    width: '70%',
+    height: '100%',
+    backgroundColor: '#2D4A22',
+    borderRadius: 3,
+  },
+  contributorBanner: {
+    backgroundColor: '#1C3E18',
+    borderRadius: 14,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  bannerTitle: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  bannerSubtitle: {
+    color: '#A7F3D0',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  viewAllText: {
+    fontSize: 12,
+    color: '#57534E',
+    fontWeight: '600',
+  },
+  horizontalList: {
+    marginHorizontal: -16,
     paddingHorizontal: 16,
+    marginBottom: 20,
+  },
+  listingCard: {
+    width: 150,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 10,
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: '#E7E5E4',
+  },
+  listingImageHolder: {
+    height: 100,
+    backgroundColor: '#F5F5F4',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+    position: 'relative',
+  },
+  tagBadge: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  tagText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#1C1917',
+  },
+  listingTitle: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#1C1917',
+  },
+  listingSubtitle: {
+    fontSize: 11,
+    color: '#78716C',
+    marginTop: 2,
+    marginBottom: 8,
+    height: 28,
+  },
+  cardActionBtn: {
+    borderWidth: 1,
+    borderColor: '#D6D3D1',
     borderRadius: 8,
-    marginLeft: 10,
+    paddingVertical: 5,
+    alignItems: 'center',
   },
-  cancelBtn: {
+  cardActionBtnText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#44403C',
+  },
+  addNewCard: {
+    borderStyle: 'dashed',
+    borderWidth: 1.5,
+    borderColor: '#A8A29E',
     backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 205,
   },
-  cancelBtnText: {
-    color: Colors.textMuted,
+  addCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#EBE9D8',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  addNewText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#44403C',
+  },
+  recentItemCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E7E5E4',
+  },
+  recentImageHolder: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: '#F5F5F4',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  recentTitle: {
     fontSize: 14,
     fontWeight: '600',
+    color: '#1C1917',
   },
-  saveBtn: {
-    backgroundColor: Colors.primary,
+  recentSubtitle: {
+    fontSize: 12,
+    color: '#78716C',
+    marginTop: 2,
   },
-  saveBtnText: {
-    color: '#FFF',
-    fontSize: 14,
+  completedBadge: {
+    backgroundColor: '#D1E7DD',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  completedBadgeText: {
+    fontSize: 10,
     fontWeight: '600',
+    color: '#0F5132',
+  },
+  timeAgoText: {
+    fontSize: 10,
+    color: '#A8A29E',
+    marginTop: 4,
   },
 });
