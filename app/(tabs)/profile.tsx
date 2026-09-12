@@ -6,12 +6,12 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  SafeAreaView,
   Modal,
   TextInput,
   Alert,
   Switch,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
@@ -20,10 +20,11 @@ export default function ProfileScreen() {
   const router = useRouter();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   
   // Profile States
   const [name, setName] = useState('Sarah Jenkins');
-  const [location, setLocation] = useState('Portland, OR');
+  const [location, locationSet] = useState('Portland, OR');
   const [bio, setBio] = useState('Avid gardener, vintage clothing enthusiast, and believer in the circular economy.');
   
   // Profile Picture State
@@ -31,7 +32,6 @@ export default function ProfileScreen() {
     'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300'
   );
 
-  // Safe navigation handler to prevent "Unmatched Route" crashes (Updated for tabs)
   const handleSafeNavigate = (routePath: string, fallbackMessage: string) => {
     try {
       if (routePath === '/impact') {
@@ -48,21 +48,20 @@ export default function ProfileScreen() {
     }
   };
 
-  // Function to pick image from gallery
   const pickImage = async () => {
     try {
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
       if (!permissionResult.granted) {
         Alert.alert('Permission Denied', 'Gallery permission is required to change profile picture!');
         return;
       }
 
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ['images'],
         allowsEditing: true,
         aspect: [1, 1],
         quality: 0.8,
+        presentationStyle: ImagePicker.UIImagePickerPresentationStyle.FULL_SCREEN,
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
@@ -81,17 +80,14 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, isDarkMode && { backgroundColor: '#1C1917' }]}>
+    <SafeAreaView style={[styles.container, isDarkMode && { backgroundColor: '#1C1917' }]} edges={['top']}>
       {/* Top App Bar */}
       <View style={styles.topBar}>
         <TouchableOpacity>
           <Ionicons name="location-outline" size={20} color="#166534" />
         </TouchableOpacity>
         <Text style={[styles.appTitle, isDarkMode && { color: '#4ADE80' }]}>EcoTrade</Text>
-        <Image
-          source={{ uri: profileImage }}
-          style={styles.topAvatar}
-        />
+        <Image source={{ uri: profileImage }} style={styles.topAvatar} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
@@ -99,10 +95,7 @@ export default function ProfileScreen() {
         {/* Profile Info Section */}
         <View style={styles.profileHeader}>
           <TouchableOpacity style={styles.avatarContainer} onPress={pickImage} activeOpacity={0.8}>
-            <Image
-              source={{ uri: profileImage }}
-              style={styles.avatar}
-            />
+            <Image source={{ uri: profileImage }} style={styles.avatar} />
             <View style={styles.cameraBadge}>
               <Ionicons name="camera" size={12} color="#FFFFFF" />
             </View>
@@ -133,6 +126,25 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
 
+        {/* Pro Achievement Badges Row */}
+        <View style={{ marginTop: 5, marginBottom: 10 }}>
+          <Text style={[styles.sectionTitle, isDarkMode && { color: '#FFFFFF' }]}>Badges & Achievements</Text>
+          <View style={styles.badgesRow}>
+            <View style={[styles.badgeCard, isDarkMode && { backgroundColor: '#292524', borderColor: '#444' }]}>
+              <Ionicons name="shield-checkmark" size={22} color="#166534" />
+              <Text style={[styles.badgeCardText, isDarkMode && { color: '#FFF' }]}>Trusted Trader</Text>
+            </View>
+            <View style={[styles.badgeCard, isDarkMode && { backgroundColor: '#292524', borderColor: '#444' }]}>
+              <Ionicons name="flash" size={22} color="#D97706" />
+              <Text style={[styles.badgeCardText, isDarkMode && { color: '#FFF' }]}>Fast Responder</Text>
+            </View>
+            <View style={[styles.badgeCard, isDarkMode && { backgroundColor: '#292524', borderColor: '#444' }]}>
+              <Ionicons name="earth" size={22} color="#2563EB" />
+              <Text style={[styles.badgeCardText, isDarkMode && { color: '#FFF' }]}>Eco Hero</Text>
+            </View>
+          </View>
+        </View>
+
         {/* Sustainability Impact Section */}
         <View style={{ marginTop: 5 }}>
           <Text style={[styles.sectionTitle, isDarkMode && { color: '#FFFFFF' }]}>Sustainability Impact</Text>
@@ -147,7 +159,6 @@ export default function ProfileScreen() {
             </View>
             <Text style={[styles.impactCountText, isDarkMode && { color: '#FFFFFF' }]}>12 items</Text>
 
-            {/* Circular Progress Representation */}
             <View style={styles.progressCircleContainer}>
               <View style={styles.progressOuterRing}>
                 <View style={styles.leafInnerIconBox}>
@@ -156,7 +167,6 @@ export default function ProfileScreen() {
               </View>
             </View>
 
-            {/* Sub Metrics Row */}
             <View style={styles.impactSubMetricsRow}>
               <View style={styles.subMetricBox}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
@@ -179,7 +189,6 @@ export default function ProfileScreen() {
               </View>
             </View>
 
-            {/* Top Contributor Badge Card */}
             <TouchableOpacity 
               style={styles.topContributorCard}
               onPress={() => Alert.alert('Top Contributor', 'See how to maintain your status.')}
@@ -203,36 +212,28 @@ export default function ProfileScreen() {
           </View>
 
           <View style={styles.listingsGrid}>
-            {/* Item 1 */}
             <TouchableOpacity 
               style={[styles.listingCard, isDarkMode && { backgroundColor: '#292524', borderColor: '#444' }]}
               onPress={() => handleSafeNavigate('/item/123', 'Opening Vintage Ceramic Planter details...')}
             >
-              <Image 
-                source={{ uri: 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=300' }} 
-                style={styles.listingImage} 
-              />
+              <Image source={{ uri: 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=300' }} style={styles.listingImage} />
               <View style={styles.listingTagBadge}>
                 <Text style={styles.listingTagText}>Garden</Text>
               </View>
               <View style={styles.listingDetails}>
                 <Text style={[styles.listingItemTitle, isDarkMode && { color: '#FFFFFF' }]} numberOfLines={1}>Vintage Ceramic P...</Text>
-                <Text style={styles.listingItemDesc} numberOfLines={1}>Excellent condition, rarely used.</Text>
+                <Text style={styles.listingItemDesc} numberOfLines={1}>Excellent condition.</Text>
                 <TouchableOpacity style={styles.itemEditBtn} onPress={(e) => { e.stopPropagation(); handleSafeNavigate('/item/edit/123', 'Opening edit page...'); }}>
                   <Text style={styles.itemEditBtnText}>Edit</Text>
                 </TouchableOpacity>
               </View>
             </TouchableOpacity>
 
-            {/* Item 2 */}
             <TouchableOpacity 
               style={[styles.listingCard, isDarkMode && { backgroundColor: '#292524', borderColor: '#444' }]}
               onPress={() => handleSafeNavigate('/item/124', 'Opening Hand-Knit Sweater details...')}
             >
-              <Image 
-                source={{ uri: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=300' }} 
-                style={styles.listingImage} 
-              />
+              <Image source={{ uri: 'https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=300' }} style={styles.listingImage} />
               <View style={styles.listingTagBadge}>
                 <Text style={styles.listingTagText}>Clothing</Text>
               </View>
@@ -245,7 +246,6 @@ export default function ProfileScreen() {
               </View>
             </TouchableOpacity>
 
-            {/* List New Item Card */}
             <TouchableOpacity 
               style={[styles.listNewCard, isDarkMode && { borderColor: '#555' }]}
               onPress={() => handleSafeNavigate('/item/create', 'Opening new item creation form...')}
@@ -265,10 +265,7 @@ export default function ProfileScreen() {
             style={[styles.swappedCard, isDarkMode && { backgroundColor: '#292524', borderColor: '#444' }]} 
             onPress={() => handleSafeNavigate('/swap/99', 'Viewing Modern Desk Lamp swap details.')}
           >
-            <Image 
-              source={{ uri: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=150' }} 
-              style={styles.swappedImage} 
-            />
+            <Image source={{ uri: 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=150' }} style={styles.swappedImage} />
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={[styles.swappedTitle, isDarkMode && { color: '#FFFFFF' }]}>Modern Desk Lamp</Text>
               <Text style={styles.swappedSubtitle}>Traded with @mark_t</Text>
@@ -287,7 +284,6 @@ export default function ProfileScreen() {
           <Text style={[styles.sectionTitle, isDarkMode && { color: '#FFFFFF' }]}>Account & Settings</Text>
           <View style={[styles.accountCard, isDarkMode && { backgroundColor: '#292524', borderColor: '#444' }]}>
             
-            {/* Dark Mode Switch */}
             <View style={styles.accountRow}>
               <View style={styles.accountRowLeft}>
                 <Ionicons name="moon-outline" size={18} color="#166534" style={{ marginRight: 10 }} />
@@ -301,7 +297,19 @@ export default function ProfileScreen() {
               />
             </View>
 
-            {/* Settings Option */}
+            <View style={[styles.accountRow, styles.accountRowBorder, isDarkMode && { borderTopColor: '#444' }]}>
+              <View style={styles.accountRowLeft}>
+                <Ionicons name="notifications-outline" size={18} color="#166534" style={{ marginRight: 10 }} />
+                <Text style={[styles.accountRowText, isDarkMode && { color: '#FFFFFF' }]}>Push Notifications</Text>
+              </View>
+              <Switch
+                value={notificationsEnabled}
+                onValueChange={setNotificationsEnabled}
+                trackColor={{ false: '#D6D3D1', true: '#166534' }}
+                thumbColor={notificationsEnabled ? '#FFFFFF' : '#f4f3f4'}
+              />
+            </View>
+
             <TouchableOpacity 
               style={[styles.accountRow, styles.accountRowBorder, isDarkMode && { borderTopColor: '#444' }]} 
               onPress={() => handleSafeNavigate('/settings', 'Opening settings page...')}
@@ -313,7 +321,6 @@ export default function ProfileScreen() {
               <Ionicons name="chevron-forward" size={18} color="#78716C" />
             </TouchableOpacity>
 
-            {/* Logout Option */}
             <TouchableOpacity 
               style={[styles.accountRow, styles.accountRowBorder, isDarkMode && { borderTopColor: '#444' }]} 
               onPress={handleLogout}
@@ -349,7 +356,7 @@ export default function ProfileScreen() {
               placeholder="Location"
               placeholderTextColor="#888"
               value={location}
-              onChangeText={setLocation}
+              onChangeText={locationSet}
             />
 
             <TextInput
@@ -384,13 +391,13 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FAF7EE' },
-  topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10 },
+  topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 10, backgroundColor: 'transparent' },
   appTitle: { fontSize: 18, fontWeight: 'bold', color: '#166534' },
   topAvatar: { width: 28, height: 28, borderRadius: 14 },
-  scrollContent: { paddingHorizontal: 16, paddingBottom: 80 },
+  scrollContent: { paddingHorizontal: 16, paddingTop: 5, paddingBottom: 110 },
   profileHeader: { alignItems: 'center', marginTop: 10, marginBottom: 15 },
   avatarContainer: { position: 'relative', marginBottom: 12 },
-  avatar: { width: 85, height: 85, borderRadius: 42.5, borderWidth: 3, borderColor: '#D1E7DD' },
+  avatar: { width: 85, height: 85, borderRadius: 42.5, borderWidth: 3, borderColor: '#166534' },
   cameraBadge: { position: 'absolute', bottom: 0, right: 0, backgroundColor: '#166534', width: 24, height: 24, borderRadius: 12, justifyContent: 'center', alignItems: 'center', borderWidth: 2, borderColor: '#FAF7EE' },
   nameRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
   nameText: { fontSize: 20, fontWeight: 'bold', color: '#1C1917', marginRight: 6 },
@@ -399,13 +406,16 @@ const styles = StyleSheet.create({
   locationRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 8 },
   locationText: { fontSize: 13, color: '#78716C', marginLeft: 3 },
   bioText: { fontSize: 13, color: '#57534E', textAlign: 'center', paddingHorizontal: 20, marginBottom: 14, lineHeight: 18 },
-  editProfileBtn: { flexDirection: 'row', backgroundColor: '#582C0D', paddingHorizontal: 20, paddingVertical: 9, borderRadius: 20, alignItems: 'center' },
+  editProfileBtn: { flexDirection: 'row', backgroundColor: '#166534', paddingHorizontal: 20, paddingVertical: 9, borderRadius: 20, alignItems: 'center' },
   editProfileBtnText: { color: '#FFFFFF', fontSize: 13, fontWeight: '600' },
   sectionTitle: { fontSize: 16, fontWeight: 'bold', color: '#1C1917', marginBottom: 10, marginTop: 10 },
   sectionHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   viewAllText: { fontSize: 13, fontWeight: '600', color: '#166534' },
   
-  // Sustainability Impact Expanded Styles
+  badgesRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
+  badgeCard: { flex: 1, backgroundColor: '#FFFFFF', borderRadius: 12, paddingVertical: 12, paddingHorizontal: 6, alignItems: 'center', borderWidth: 1, borderColor: '#E7E5E4' },
+  badgeCardText: { fontSize: 11, fontWeight: '600', color: '#1C1917', marginTop: 6, textAlign: 'center' },
+
   impactMainCard: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 16, marginBottom: 15, borderWidth: 1, borderColor: '#E7E5E4' },
   impactHeaderRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
   impactCardTitle: { fontSize: 12, fontWeight: 'bold', color: '#166534', letterSpacing: 0.5 },
@@ -424,7 +434,6 @@ const styles = StyleSheet.create({
   topContributorTitle: { fontSize: 13, fontWeight: 'bold', color: '#166534', marginBottom: 2 },
   topContributorSubtitle: { fontSize: 11, color: '#4B5563' },
 
-  // Active Listings Styles
   listingsGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
   listingCard: { width: '48%', backgroundColor: '#FFFFFF', borderRadius: 14, overflow: 'hidden', marginBottom: 12, borderWidth: 1, borderColor: '#E7E5E4', position: 'relative' },
   listingImage: { width: '100%', height: 110 },
@@ -439,7 +448,6 @@ const styles = StyleSheet.create({
   plusIconCircle: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#E2F0E9', justifyContent: 'center', alignItems: 'center', marginBottom: 8 },
   listNewText: { fontSize: 12, fontWeight: '600', color: '#166534' },
 
-  // Recently Swapped Styles
   swappedCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#FFFFFF', borderRadius: 14, padding: 12, borderWidth: 1, borderColor: '#E7E5E4' },
   swappedImage: { width: 45, height: 45, borderRadius: 8 },
   swappedTitle: { fontSize: 13, fontWeight: 'bold', color: '#1C1917', marginBottom: 2 },
@@ -449,20 +457,18 @@ const styles = StyleSheet.create({
   completedBadgeText: { fontSize: 9, fontWeight: 'bold', color: '#166534' },
   swappedTimeText: { fontSize: 10, color: '#9CA3AF' },
 
-  // Account Card Styles
   accountCard: { backgroundColor: '#FFFFFF', borderRadius: 16, paddingHorizontal: 16, paddingVertical: 4, marginBottom: 15, borderWidth: 1, borderColor: '#E7E5E4' },
   accountRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12 },
   accountRowBorder: { borderTopWidth: 1, borderTopColor: '#E7E5E4' },
   accountRowLeft: { flexDirection: 'row', alignItems: 'center' },
   accountRowText: { fontSize: 14, fontWeight: '600', color: '#1C1917' },
 
-  // Modal Styles
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
-  modalContent: { width: '85%', backgroundColor: '#FAF7EE', borderRadius: 20, padding: 20, alignItems: 'center' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 20 },
+  modalContent: { width: '100%', backgroundColor: '#FAF7EE', borderRadius: 20, padding: 20, alignItems: 'center' },
   modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#166534', marginBottom: 12 },
   modalInput: { width: '100%', borderWidth: 1, borderColor: '#D6D3D1', backgroundColor: '#FFFFFF', borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, fontSize: 13, color: '#1C1917', marginBottom: 10 },
   submitModalBtn: { width: '100%', backgroundColor: '#166534', borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginTop: 4 },
-  submitModalBtnText: { color: '#FFFFFF', fontSize: 14, fontWeight: 'bold' },
+  submitModalBtnText: { color: '#FFFFFF', jsonify: 'center', fontSize: 14, fontWeight: 'bold' },
   cancelModalBtn: { marginTop: 10, paddingVertical: 6 },
   cancelModalBtnText: { color: '#78716C', fontSize: 13, fontWeight: '600' },
 });
