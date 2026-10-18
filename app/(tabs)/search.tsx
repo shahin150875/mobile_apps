@@ -6,6 +6,7 @@ import { Colors } from '@/constants/Colors';
 import * as Location from 'expo-location';
 
 export default function SearchScreen() {
+  
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [favorites, setFavorites] = useState<{ [key: string]: boolean }>({});
