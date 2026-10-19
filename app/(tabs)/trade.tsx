@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useRouter } from 'expo-router';
+import { useTheme } from '@/hooks/ThemeContext';
 
 interface InventoryItem {
   id: string;
@@ -27,18 +28,19 @@ const INITIAL_INVENTORY: InventoryItem[] = [
     id: '1',
     title: 'Large Monstera Plant',
     image: 'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?q=80&w=500&auto=format&fit=crop',
-    value: '$45',
+    value: '\$45',
   },
   {
     id: '2',
     title: 'Ceramic Bowl Set',
     image: 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?q=80&w=500&auto=format&fit=crop',
-    value: '$60',
+    value: '\$60',
   },
 ];
 
 export default function TradeScreen() {
   const router = useRouter();
+  const { isDarkMode } = useTheme();
 
   const [inventory, setInventory] = useState<InventoryItem[]>(INITIAL_INVENTORY);
   const [selectedItemId, setSelectedItemId] = useState<string>('1');
@@ -47,7 +49,6 @@ export default function TradeScreen() {
   const [message, setMessage] = useState<string>(
     'Hi Sarah! I have a healthy Monstera that might look great on that table...'
   );
-
   const [isAddItemModalVisible, setIsAddItemModalVisible] = useState<boolean>(false);
   const [newItemTitle, setNewItemTitle] = useState<string>('');
   const [newItemDetailInput, setNewItemDetailInput] = useState<string>('');
@@ -61,7 +62,7 @@ export default function TradeScreen() {
     description: 'Solid oak mid-century style coffee table. Minor wear on one leg, but otherwise in excellent condition.',
     owner: 'Sarah M.',
     ownerAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop',
-    value: '$180',
+    value: '\$180',
   };
 
   const selectedItem = inventory.find((item) => item.id === selectedItemId);
@@ -112,42 +113,27 @@ export default function TradeScreen() {
   const getDynamicSuggestions = () => {
     const combinedText = `${newItemTitle} ${newItemDetailInput}`.toLowerCase();
     
-    // --- SAMSUNG ---
     if (combinedText.includes('samsung') || combinedText.includes('galaxy')) {
       return [
         'Samsung Galaxy S10, 128GB, Prism White (2019)',
         'Samsung Galaxy Note 10+, 256GB, Aura Glow (2019)',
         'Samsung Galaxy S20 Ultra, 128GB, Cosmic Gray (2020)',
-        'Samsung Galaxy Note 20 Ultra, 256GB, Mystic Bronze (2020)',
         'Samsung Galaxy S21 Ultra, 256GB, Phantom Black (2021)',
         'Samsung Galaxy S22 Ultra, 256GB, Burgundy (2022)',
         'Samsung Galaxy S23 Ultra, 512GB, Green (2023)',
-        'Samsung Galaxy A54 5G, 128GB, Awesome Graphite (2023)',
-        'Samsung Galaxy S24 Ultra, 512GB, Titanium Gray (2024)',
-        'Samsung Galaxy S24+, 256GB, Amber Yellow (2024)',
-        'Samsung Galaxy Z Fold6, 512GB, Silver Shadow (2024/2025)',
-        'Samsung Galaxy A55 5G, 256GB, Awesome Iceblue (2024)'
+        'Samsung Galaxy S24 Ultra, 512GB, Titanium Gray (2024)'
       ];
     }
-
-    // --- XIAOMI / REDMI ---
     if (combinedText.includes('redmi') || combinedText.includes('xiaomi')) {
       return [
-        'Xiaomi Redmi Note 7, 64GB, Space Black (2019)',
         'Xiaomi Redmi Note 9 Pro, 128GB, Interstellar Gray (2020)',
         'Xiaomi Redmi Note 10 Pro, 128GB, Glacier Blue (2021)',
-        'Xiaomi Redmi Note 11 Pro+, 256GB, Forest Green (2022)',
         'Xiaomi Redmi Note 12 Pro+, 256GB, Midnight Black (2023)',
-        'Xiaomi Redmi Note 13 Pro+, 512GB, Midnight Black (2024)',
-        'Xiaomi 14 Ultra, 512GB, Black (2024)',
-        'Xiaomi Redmi Note 14 Pro+, 512GB, Frost White (Current/New)'
+        'Xiaomi Redmi Note 13 Pro+, 512GB, Midnight Black (2024)'
       ];
     }
-
-    // --- APPLE IPHONE ---
     if (combinedText.includes('iphone') || combinedText.includes('apple')) {
       return [
-        'Apple iPhone X, 64GB, Space Gray (2017)',
         'Apple iPhone 11 Pro, 256GB, Midnight Green (2019)',
         'Apple iPhone 12, 128GB, Blue (2020)',
         'Apple iPhone 13, 128GB, Starlight (2021)',
@@ -156,82 +142,27 @@ export default function TradeScreen() {
         'Apple iPhone 16 Pro, 256GB, Desert Titanium (2024/Current)'
       ];
     }
-
-    // --- GOOGLE PIXEL ---
     if (combinedText.includes('pixel') || combinedText.includes('google')) {
       return [
-        'Google Pixel 3 XL, 64GB, Clearly White (2018)',
         'Google Pixel 5, 128GB, Just Black (2020)',
-        'Google Pixel 6 Pro, 128GB, Stormy Black (2021)',
         'Google Pixel 7 Pro, 128GB, Obsidian (2022)',
         'Google Pixel 8 Pro, 128GB, Bay (2023)',
         'Google Pixel 9 Pro XL, 256GB, Porcelain (2024/Current)'
       ];
     }
-
-    // --- LAPTOPS / MACBOOKS ---
     if (combinedText.includes('laptop') || combinedText.includes('macbook') || combinedText.includes('pc')) {
       return [
-        'Apple MacBook Pro 15", Intel i7, 16GB RAM (2018 - Older)',
         'Apple MacBook Air 13", M1 Chip, 8GB RAM, 256GB SSD (2020)',
         'Dell XPS 15, Intel Core i7 11th Gen, RTX 3050 Ti (2021)',
-        'ASUS ROG Zephyrus G14, Ryzen 9, RTX 3060 (2022)',
         'Apple MacBook Pro 14", M2 Pro, 16GB RAM, 512GB SSD (2023)',
-        'Apple MacBook Pro 16", M3 Max, 36GB RAM, 1TB SSD (2024/Current)',
-        'Dell XPS 16, Core Ultra 7, RTX 4070 (2024/Current)'
+        'Apple MacBook Pro 16", M3 Max, 36GB RAM, 1TB SSD (2024/Current)'
       ];
     }
-
-    // --- WATCHES ---
-    if (combinedText.includes('watch')) {
-      return [
-        'Rolex Submariner Date, Stainless Steel, Black Dial (Vintage/Classic)',
-        'Apple Watch Series 4, 44mm, Space Gray Aluminum (2018)',
-        'Apple Watch Series 8, 41mm, Midnight Aluminum (2022)',
-        'Omega Seamaster Diver 300M, Blue Wave Dial (2023)',
-        'Apple Watch Ultra 2, Titanium Case, Alpine Loop (2023/2024)',
-        'Rolex GMT-Master II "Pepsi", Oystersteel (Current/New)'
-      ];
-    }
-
-    // --- SHOES / SNEAKERS ---
-    if (combinedText.includes('shoe') || combinedText.includes('sneaker')) {
-      return [
-        'Nike Air Jordan 1 Retro High "Bred", Size 10 (Classic)',
-        'Adidas Yeezy Boost 350 V2 "Zebra", Size 9.5 (2017/Retocked)',
-        "Nike Air Force 1 '07, All White, Size 10 (Evergreen)",
-        'New Balance 990v5, Grey, Size 10.5 (2019)',
-        'Nike Air Jordan 1 Retro High OG "Lost & Found", Size 10 (2022)',
-        'New Balance 990v6, Grey, Size 10.5 (Current/New)'
-      ];
-    }
-
-    // --- HOUSES / REAL ESTATE ---
-    if (combinedText.includes('house') || combinedText.includes('home') || combinedText.includes('apartment')) {
-      return [
-        'Classic Suburban Family Home, Red Bricks, 3 Beds (Older Build)',
-        'Mid-Century Modern House, Wooden Interior, 4 Beds (Renovated)',
-        'Luxury City Penthouse Apartment, Floor-to-Ceiling Windows (Modern)',
-        'Smart Eco-Villa, Solar Powered, 4 Bedrooms, Swimming Pool (Current/New)'
-      ];
-    }
-
-    // --- PLANTS ---
-    if (combinedText.includes('plant') || combinedText.includes('flower') || combinedText.includes('monstera')) {
-      return [
-        'Classic Mature Golden Pothos in Ceramic Pot (Established)',
-        'Large Monstera Deliciosa, 5 Fenestrated Leaves, 10" Pot',
-        'Rare Monstera Albo Variegated, Cutting with Active Node',
-        'Fiddle Leaf Fig Tree, 5ft Tall, Premium Planter (Current/New)'
-      ];
-    }
-
     if (combinedText.trim() === '') {
       return [
         'Type any item above (e.g. Mobile, Laptop, Watch, Plant) to explore old, recent & current models'
       ];
     }
-
     return [
       'Older Classic Edition, Well Preserved, Original Box',
       'Popular Mid-Generation Release, Excellent Working Order',
@@ -244,20 +175,16 @@ export default function TradeScreen() {
       Alert.alert('Error', 'Please enter a title for the new item.');
       return;
     }
-
     const formattedValue = newItemValue.trim() 
-      ? (newItemValue.startsWith('$') ? newItemValue.trim() : `$${newItemValue.trim()}`) 
-      : '$50';
-
+      ? (newItemValue.startsWith('\$') ? newItemValue.trim() : `$${newItemValue.trim()}`) 
+      : '\$50';
     const matchedImage = getSmartImageForTitle(`${newItemTitle} ${newItemDetailInput}`);
-
     const newItem: InventoryItem = {
       id: Date.now().toString(),
-      title: `${newItemTitle.trim()}${newItemDetailInput ? ` (${newItemDetailInput.trim()})` : ''}`,
+      title: `${newItemTitle.trim()}${newItemDetailInput ? ` (\${newItemDetailInput.trim()})` : ''}`,
       image: matchedImage,
       value: formattedValue,
     };
-
     setInventory((prev) => [...prev, newItem]);
     setSelectedItemId(newItem.id);
     setNewItemTitle('');
@@ -275,21 +202,30 @@ export default function TradeScreen() {
     setIsSuccessModalVisible(true);
   };
 
+  // Dynamic Theme Variables
+  const containerBg = isDarkMode ? '#121212' : '#FAF7EE';
+  const cardBg = isDarkMode ? '#1E1E1E' : '#FFFFFF';
+  const textColor = isDarkMode ? '#FFFFFF' : '#1C1917';
+  const subTextColor = isDarkMode ? '#A8A29E' : '#78716C';
+  const borderColor = isDarkMode ? '#333333' : '#F0ECE1';
+  const primaryGreen = isDarkMode ? '#4ADE80' : '#0F381E';
+  const accentCardBg = isDarkMode ? '#1A2E22' : '#E2EFE0';
+
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.headerBtn} onPress={() => router.back()} activeOpacity={0.7}>
-          <Ionicons name="arrow-back" size={20} color="#0F381E" />
+    <SafeAreaView style={[styles.container, { backgroundColor: containerBg }]}>
+      <View style={[styles.header, { borderBottomColor: borderColor }]}>
+        <TouchableOpacity style={[styles.headerBtn, { backgroundColor: isDarkMode ? '#1E1E1E' : '#F3EFE3' }]} onPress={() => router.back()} activeOpacity={0.7}>
+          <Ionicons name="arrow-back" size={20} color={primaryGreen} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>EcoTrade</Text>
-        <Image source={{ uri: requestedItem.ownerAvatar }} style={styles.headerProfileImg} />
+        <Text style={[styles.headerTitle, { color: primaryGreen }]}>EcoTrade</Text>
+        <Image source={{ uri: requestedItem.ownerAvatar }} style={[styles.headerProfileImg, { borderColor: primaryGreen }]} />
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        <Text style={styles.sectionHeading}>You are requesting</Text>
-        <Text style={styles.sectionSubHeading}>Review the item details before sending your proposal.</Text>
-
-        <View style={styles.requestedCard}>
+        <Text style={[styles.sectionHeading, { color: textColor }]}>You are requesting</Text>
+        <Text style={[styles.sectionSubHeading, { color: subTextColor }]}>Review the item details before sending your proposal.</Text>
+        
+        <View style={[styles.requestedCard, { backgroundColor: cardBg, borderColor }]}>
           <View style={styles.requestedImageContainer}>
             <Image 
               source={{ uri: 'https://images.unsplash.com/photo-1532323544230-7191fd51bc1b?q=80&w=800&auto=format&fit=crop' }} 
@@ -299,37 +235,40 @@ export default function TradeScreen() {
               <Text style={styles.valueBadgeText}>{requestedItem.value}</Text>
             </View>
           </View>
-
           <View style={styles.requestedInfo}>
             <View style={styles.titleCategoryRow}>
-              <Text style={styles.requestedTitle}>{requestedItem.title}</Text>
-              <View style={styles.categoryBadge}>
-                <Text style={styles.categoryText}>{requestedItem.category}</Text>
+              <Text style={[styles.requestedTitle, { color: textColor }]}>{requestedItem.title}</Text>
+              <View style={[styles.categoryBadge, { backgroundColor: accentCardBg }]}>
+                <Text style={[styles.categoryText, { color: primaryGreen }]}>{requestedItem.category}</Text>
               </View>
             </View>
-            <Text style={styles.requestedDesc} numberOfLines={2}>
+            <Text style={[styles.requestedDesc, { color: subTextColor }]} numberOfLines={2}>
               {requestedItem.description}
             </Text>
-            <View style={styles.ownerRow}>
+            <View style={[styles.ownerRow, { borderTopColor: isDarkMode ? '#333' : '#F5F2E9' }]}>
               <Image source={{ uri: requestedItem.ownerAvatar }} style={styles.ownerAvatar} />
-              <Text style={styles.ownerText}>
-                Offered by <Text style={{ fontWeight: '700', color: '#1C1917' }}>{requestedItem.owner}</Text>
+              <Text style={[styles.ownerText, { color: subTextColor }]}>
+                Offered by <Text style={{ fontWeight: '700', color: textColor }}>{requestedItem.owner}</Text>
               </Text>
-              <Ionicons name="checkmark-circle" size={14} color="#166534" style={{ marginLeft: -2 }} />
+              <Ionicons name="checkmark-circle" size={14} color={primaryGreen} style={{ marginLeft: -2 }} />
             </View>
           </View>
         </View>
 
-        <Text style={[styles.sectionHeading, { marginTop: 28 }]}>Your Offer</Text>
-        <Text style={styles.sectionSubHeading}>Select an item from your inventory to trade.</Text>
-
+        <Text style={[styles.sectionHeading, { marginTop: 28, color: textColor }]}>Your Offer</Text>
+        <Text style={[styles.sectionSubHeading, { color: subTextColor }]}>Select an item from your inventory to trade.</Text>
+        
         <View style={styles.inventoryGrid}>
           {inventory.map((item) => {
             const isSelected = item.id === selectedItemId;
             return (
               <TouchableOpacity
                 key={item.id}
-                style={[styles.inventoryCard, isSelected && styles.selectedInventoryCard]}
+                style={[
+                  styles.inventoryCard, 
+                  { backgroundColor: cardBg, borderColor: isSelected ? primaryGreen : (isDarkMode ? '#333' : '#EFEBE0') },
+                  isSelected && { backgroundColor: isDarkMode ? '#1A2E22' : '#F7FBF6', borderWidth: 2 }
+                ]}
                 onPress={() => setSelectedItemId(item.id)}
                 activeOpacity={0.85}
               >
@@ -339,13 +278,13 @@ export default function TradeScreen() {
                     <Text style={styles.itemValText}>{item.value}</Text>
                   </View>
                   {isSelected && (
-                    <View style={styles.checkmarkBadge}>
+                    <View style={[styles.checkmarkBadge, { backgroundColor: primaryGreen }]}>
                       <Ionicons name="checkmark" size={12} color="#FFFFFF" />
                     </View>
                   )}
                 </View>
-                <View style={styles.inventoryTitleBox}>
-                  <Text style={styles.inventoryTitle} numberOfLines={1}>
+                <View style={[styles.inventoryTitleBox, { backgroundColor: cardBg }]}>
+                  <Text style={[styles.inventoryTitle, { color: textColor }]} numberOfLines={1}>
                     {item.title}
                   </Text>
                 </View>
@@ -354,7 +293,10 @@ export default function TradeScreen() {
           })}
 
           <TouchableOpacity
-            style={styles.addNewCard}
+            style={[
+              styles.addNewCard, 
+              { backgroundColor: isDarkMode ? '#1E1E1E' : '#F3EFE3', borderColor: isDarkMode ? '#444' : '#D8D2C2' }
+            ]}
             onPress={() => {
               setNewItemTitle('');
               setNewItemDetailInput('');
@@ -364,14 +306,14 @@ export default function TradeScreen() {
             }}
             activeOpacity={0.7}
           >
-            <View style={styles.addIconCircle}>
-              <Ionicons name="add" size={22} color="#0F381E" />
+            <View style={[styles.addIconCircle, { backgroundColor: accentCardBg }]}>
+              <Ionicons name="add" size={22} color={primaryGreen} />
             </View>
-            <Text style={styles.addNewText}>Add New Item</Text>
+            <Text style={[styles.addNewText, { color: primaryGreen }]}>Add New Item</Text>
           </TouchableOpacity>
         </View>
 
-        <View style={styles.cashTopUpContainer}>
+        <View style={[styles.cashTopUpContainer, { backgroundColor: isDarkMode ? '#1E1E1E' : '#F3EFE3', borderColor: isDarkMode ? '#333' : '#EBE5D5' }]}>
           <TouchableOpacity
             style={styles.checkboxRow}
             onPress={() => setAddCash(!addCash)}
@@ -380,20 +322,20 @@ export default function TradeScreen() {
             <Ionicons
               name={addCash ? 'checkbox' : 'square-outline'}
               size={22}
-              color="#0F381E"
+              color={primaryGreen}
             />
-            <Text style={styles.cashTopUpLabel}>Add cash to balance the trade</Text>
+            <Text style={[styles.cashTopUpLabel, { color: textColor }]}>Add cash to balance the trade</Text>
           </TouchableOpacity>
-
           {addCash && (
-            <View style={styles.cashInputRow}>
-              <Text style={styles.currencySymbol}>$</Text>
+            <View style={[styles.cashInputRow, { backgroundColor: isDarkMode ? '#2D2D2D' : '#FFFFFF', borderColor: isDarkMode ? '#444' : '#D8D2C2' }]}>
+              <Text style={[styles.currencySymbol, { color: textColor }]}>\$</Text>
               <TextInput
-                style={styles.cashInput}
+                style={[styles.cashInput, { color: textColor }]}
                 keyboardType="numeric"
                 value={cashAmount}
                 onChangeText={setCashAmount}
                 placeholder="0"
+                placeholderTextColor={subTextColor}
               />
             </View>
           )}
@@ -401,68 +343,62 @@ export default function TradeScreen() {
 
         <View style={styles.quickChipsRow}>
           <TouchableOpacity 
-            style={styles.chipBtn} 
+            style={[styles.chipBtn, { backgroundColor: accentCardBg, borderColor: isDarkMode ? '#254E32' : '#CBE4C6' }]} 
             onPress={() => setMessage('Hi! Is this item still available for trade?')}
           >
-            <Text style={styles.chipText}>💬 Still available?</Text>
+            <Text style={[styles.chipText, { color: primaryGreen }]}>💬 Still available?</Text>
           </TouchableOpacity>
           <TouchableOpacity 
-            style={styles.chipBtn} 
+            style={[styles.chipBtn, { backgroundColor: accentCardBg, borderColor: isDarkMode ? '#254E32' : '#CBE4C6' }]} 
             onPress={() => setMessage('Hi! Can we meet locally for this swap?')}
           >
-            <Text style={styles.chipText}>🤝 Local meet?</Text>
+            <Text style={[styles.chipText, { color: primaryGreen }]}>🤝 Local meet?</Text>
           </TouchableOpacity>
         </View>
 
-        <Text style={styles.inputLabel}>MESSAGE TO OWNER (OPTIONAL)</Text>
-        <View style={styles.messageBox}>
+        <Text style={[styles.inputLabel, { color: subTextColor }]}>MESSAGE TO OWNER (OPTIONAL)</Text>
+        <View style={[styles.messageBox, { backgroundColor: accentCardBg, borderColor: isDarkMode ? '#254E32' : '#CBE4C6' }]}>
           <TextInput
-            style={styles.messageInput}
+            style={[styles.messageInput, { color: textColor }]}
             multiline
             value={message}
             onChangeText={setMessage}
             placeholder="Type your message here..."
-            placeholderTextColor="#A8A29E"
+            placeholderTextColor={subTextColor}
           />
         </View>
 
-        <View style={styles.previewContainer}>
+        <View style={[styles.previewContainer, { backgroundColor: isDarkMode ? '#1A1A1A' : '#EBE5D5', borderColor: isDarkMode ? '#333' : '#DFD8C5' }]}>
           <View style={styles.previewHeader}>
-            <Text style={styles.previewTitle}>Trade Summary Preview</Text>
-            <Ionicons name="shield-checkmark-outline" size={18} color="#0F381E" />
+            <Text style={[styles.previewTitle, { color: textColor }]}>Trade Summary Preview</Text>
+            <Ionicons name="shield-checkmark-outline" size={18} color={primaryGreen} />
           </View>
-
           <View style={styles.previewCardRow}>
-            <View style={styles.previewPill}>
-              <Ionicons name="leaf-outline" size={14} color="#0F381E" />
-              <Text style={styles.previewPillText} numberOfLines={1}>
+            <View style={[styles.previewPill, { backgroundColor: cardBg, borderColor: isDarkMode ? '#333' : '#E2DBCA' }]}>
+              <Ionicons name="leaf-outline" size={14} color={primaryGreen} />
+              <Text style={[styles.previewPillText, { color: textColor }]} numberOfLines={1}>
                 {selectedItem ? selectedItem.title : 'Select Item'}
                 {addCash && cashAmount ? ` + $${cashAmount}` : ''}
               </Text>
             </View>
-
-            <Text style={styles.forText}>for</Text>
-
-            <View style={styles.previewPill}>
-              <Text style={styles.previewPillText} numberOfLines={1}>
+            <Text style={[styles.forText, { color: subTextColor }]}>for</Text>
+            <View style={[styles.previewPill, { backgroundColor: cardBg, borderColor: isDarkMode ? '#333' : '#E2DBCA' }]}>
+              <Text style={[styles.previewPillText, { color: textColor }]} numberOfLines={1}>
                 {requestedItem.title}
               </Text>
             </View>
           </View>
-
-          <View style={styles.fairTradeBar}>
-            <Ionicons name="flash" size={12} color="#166534" />
-            <Text style={styles.fairTradeText}>Estimated Match: <Text style={{fontWeight: '800'}}>Great Balance</Text></Text>
+          <View style={[styles.fairTradeBar, { backgroundColor: accentCardBg }]}>
+            <Ionicons name="flash" size={12} color={primaryGreen} />
+            <Text style={[styles.fairTradeText, { color: primaryGreen }]}>Estimated Match: <Text style={{fontWeight: '800'}}>Great Balance</Text></Text>
           </View>
-
-          <TouchableOpacity style={styles.sendButton} onPress={handleSendProposal} activeOpacity={0.85}>
+          <TouchableOpacity style={[styles.sendButton, { backgroundColor: primaryGreen }]} onPress={handleSendProposal} activeOpacity={0.85}>
             <Text style={styles.sendButtonText}>Send Secure Proposal</Text>
             <Ionicons name="arrow-forward" size={16} color="#FFFFFF" style={{ marginLeft: 6 }} />
           </TouchableOpacity>
-
           <View style={styles.secureFooterNote}>
-            <Ionicons name="lock-closed-outline" size={12} color="#78716C" />
-            <Text style={styles.secureFooterText}>Protected by EcoTrade Escrow Guarantee</Text>
+            <Ionicons name="lock-closed-outline" size={12} color={subTextColor} />
+            <Text style={[styles.secureFooterText, { color: subTextColor }]}>Protected by EcoTrade Escrow Guarantee</Text>
           </View>
         </View>
       </ScrollView>
@@ -470,47 +406,41 @@ export default function TradeScreen() {
       {/* Add New Item Modal */}
       <Modal visible={isAddItemModalVisible} transparent animationType="fade">
         <View style={styles.modalBg}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Add New Item</Text>
-            <Text style={styles.modalSub}>Search or select any item (Mobile, Laptop, Watch, House, Plant, etc.) — Old, Recent & Current models supported.</Text>
+          <View style={[styles.modalContent, { backgroundColor: cardBg }]}>
+            <Text style={[styles.modalTitle, { color: textColor }]}>Add New Item</Text>
+            <Text style={[styles.modalSub, { color: subTextColor }]}>Search or select any item (Mobile, Laptop, Watch, House, Plant, etc.) — Old, Recent & Current models supported.</Text>
             
-            {/* 1st Box: Item Category/Name */}
             <TextInput
-              style={styles.modalInput}
+              style={[styles.modalInput, { backgroundColor: isDarkMode ? '#2D2D2D' : '#F5F5F4', color: textColor, borderColor: isDarkMode ? '#444' : '#E7E2D0' }]}
               placeholder="Item Category (e.g. Mobile, Laptop, Watch, House)"
-              placeholderTextColor="#A8A29E"
+              placeholderTextColor={subTextColor}
               value={newItemTitle}
               onChangeText={(text) => setNewItemTitle(text)}
               autoFocus={true}
             />
-
-            {/* 2nd Box: Brand / Model Spec Input */}
             <TextInput
-              style={styles.modalInput}
+              style={[styles.modalInput, { backgroundColor: isDarkMode ? '#2D2D2D' : '#F5F5F4', color: textColor, borderColor: isDarkMode ? '#444' : '#E7E2D0' }]}
               placeholder={getExtraBoxPlaceholder()}
-              placeholderTextColor="#A8A29E"
+              placeholderTextColor={subTextColor}
               value={newItemDetailInput}
               onChangeText={(text) => setNewItemDetailInput(text)}
             />
-
-            {/* Estimated Price Box */}
             <TextInput
-              style={styles.modalInput}
+              style={[styles.modalInput, { backgroundColor: isDarkMode ? '#2D2D2D' : '#F5F5F4', color: textColor, borderColor: isDarkMode ? '#444' : '#E7E2D0' }]}
               placeholder="Estimated Price (e.g. 12000)"
-              placeholderTextColor="#A8A29E"
+              placeholderTextColor={subTextColor}
               keyboardType="numeric"
               value={newItemValue}
               onChangeText={(text) => setNewItemValue(text)}
             />
-
-            <Text style={styles.dropdownLabel}>Select Model (Old, Recent & Current):</Text>
-            <ScrollView style={styles.suggestionsContainer} nestedScrollEnabled={true}>
+            <Text style={[styles.dropdownLabel, { color: subTextColor }]}>Select Model (Old, Recent & Current):</Text>
+            <ScrollView style={[styles.suggestionsContainer, { backgroundColor: isDarkMode ? '#252525' : '#FBF9F4', borderColor: isDarkMode ? '#444' : '#E7E2D0' }]} nestedScrollEnabled={true}>
               {getDynamicSuggestions().map((option, index) => {
                 const isSelected = selectedDetailOption === option || newItemDetailInput === option;
                 return (
                   <TouchableOpacity
                     key={index}
-                    style={[styles.suggestionItem, isSelected && styles.selectedSuggestionItem]}
+                    style={[styles.suggestionItem, isSelected && { backgroundColor: accentCardBg }, { borderBottomColor: isDarkMode ? '#333' : '#F0ECE1' }]}
                     onPress={() => {
                       setSelectedDetailOption(option);
                       setNewItemDetailInput(option);
@@ -520,26 +450,24 @@ export default function TradeScreen() {
                     <Ionicons 
                       name={isSelected ? "radio-button-on" : "radio-button-off"} 
                       size={16} 
-                      color={isSelected ? "#166534" : "#78716C"} 
+                      color={isSelected ? primaryGreen : subTextColor} 
                     />
-                    <Text style={[styles.suggestionText, isSelected && styles.selectedSuggestionText]}>
+                    <Text style={[styles.suggestionText, { color: subTextColor }, isSelected && { color: primaryGreen, fontWeight: '700' }]}>
                       {option}
                     </Text>
                   </TouchableOpacity>
                 );
               })}
             </ScrollView>
-
-            <TouchableOpacity style={styles.modalBtnPrimary} onPress={handleAddNewItem} activeOpacity={0.85}>
+            <TouchableOpacity style={[styles.modalBtnPrimary, { backgroundColor: primaryGreen }]} onPress={handleAddNewItem} activeOpacity={0.85}>
               <Text style={styles.modalBtnPrimaryText}>Save Item</Text>
             </TouchableOpacity>
-
             <TouchableOpacity 
               style={styles.modalBtnSecondary} 
               onPress={() => setIsAddItemModalVisible(false)} 
               activeOpacity={0.7}
             >
-              <Text style={styles.modalBtnSecondaryText}>Cancel</Text>
+              <Text style={[styles.modalBtnSecondaryText, { color: subTextColor }]}>Cancel</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -548,16 +476,16 @@ export default function TradeScreen() {
       {/* Success Modal */}
       <Modal visible={isSuccessModalVisible} transparent animationType="fade">
         <View style={styles.modalBg}>
-          <View style={styles.modalContent}>
-            <View style={styles.successIconWrapper}>
+          <View style={[styles.modalContent, { backgroundColor: cardBg }]}>
+            <View style={[styles.successIconWrapper, { backgroundColor: primaryGreen }]}>
               <Ionicons name="checkmark" size={36} color="#FFFFFF" />
             </View>
-            <Text style={styles.modalTitle}>Proposal Sent!</Text>
-            <Text style={styles.modalSub}>
+            <Text style={[styles.modalTitle, { color: textColor }]}>Proposal Sent!</Text>
+            <Text style={[styles.modalSub, { color: subTextColor }]}>
               Your trade offer has been securely sent to {requestedItem.owner}.
             </Text>
             <TouchableOpacity
-              style={styles.modalBtnPrimary}
+              style={[styles.modalBtnPrimary, { backgroundColor: primaryGreen }]}
               onPress={() => {
                 setIsSuccessModalVisible(false);
                 router.push({
@@ -582,7 +510,6 @@ export default function TradeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FAF7EE',
     paddingTop: Platform.OS === 'android' ? 35 : 0,
   },
   header: {
@@ -592,17 +519,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0ECE1',
   },
   headerBtn: {
     padding: 6,
-    backgroundColor: '#F3EFE3',
     borderRadius: 10,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#0F381E',
     letterSpacing: 0.3,
   },
   headerProfileImg: {
@@ -610,7 +534,6 @@ const styles = StyleSheet.create({
     height: 36,
     borderRadius: 18,
     borderWidth: 1.5,
-    borderColor: '#0F381E',
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -620,17 +543,14 @@ const styles = StyleSheet.create({
   sectionHeading: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#1C1917',
     letterSpacing: -0.2,
   },
   sectionSubHeading: {
     fontSize: 13,
-    color: '#78716C',
     marginTop: 2,
     marginBottom: 16,
   },
   requestedCard: {
-    backgroundColor: '#FFFFFF',
     borderRadius: 20,
     overflow: 'hidden',
     shadowColor: '#1C1917',
@@ -639,7 +559,6 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 4,
     borderWidth: 1,
-    borderColor: '#F0ECE1',
   },
   requestedImageContainer: {
     position: 'relative',
@@ -673,11 +592,9 @@ const styles = StyleSheet.create({
   requestedTitle: {
     fontSize: 17,
     fontWeight: '800',
-    color: '#1C1917',
     flex: 1,
   },
   categoryBadge: {
-    backgroundColor: '#E2EFE0',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -685,11 +602,9 @@ const styles = StyleSheet.create({
   categoryText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#166534',
   },
   requestedDesc: {
     fontSize: 13,
-    color: '#57534E',
     marginTop: 6,
     lineHeight: 18,
   },
@@ -700,7 +615,6 @@ const styles = StyleSheet.create({
     marginTop: 14,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#F5F2E9',
   },
   ownerAvatar: {
     width: 24,
@@ -709,7 +623,6 @@ const styles = StyleSheet.create({
   },
   ownerText: {
     fontSize: 13,
-    color: '#78716C',
   },
   inventoryGrid: {
     flexDirection: 'row',
@@ -720,19 +633,12 @@ const styles = StyleSheet.create({
     width: '48%',
     borderRadius: 16,
     overflow: 'hidden',
-    backgroundColor: '#FFFFFF',
     shadowColor: '#1C1917',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.06,
     shadowRadius: 10,
     elevation: 3,
     borderWidth: 1.5,
-    borderColor: '#EFEBE0',
-  },
-  selectedInventoryCard: {
-    borderColor: '#0F381E',
-    borderWidth: 2,
-    backgroundColor: '#F7FBF6',
   },
   inventoryImageWrapper: {
     position: 'relative',
@@ -760,7 +666,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     right: 8,
-    backgroundColor: '#0F381E',
     width: 22,
     height: 22,
     borderRadius: 11,
@@ -772,21 +677,17 @@ const styles = StyleSheet.create({
   inventoryTitleBox: {
     paddingHorizontal: 10,
     paddingVertical: 8,
-    backgroundColor: '#FFFFFF',
   },
   inventoryTitle: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#1C1917',
   },
   addNewCard: {
     width: '48%',
     height: 142,
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: '#D8D2C2',
     borderStyle: 'dashed',
-    backgroundColor: '#F3EFE3',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -794,7 +695,6 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#E2EFE0',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 6,
@@ -802,15 +702,12 @@ const styles = StyleSheet.create({
   addNewText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#0F381E',
   },
   cashTopUpContainer: {
     marginTop: 18,
-    backgroundColor: '#F3EFE3',
     borderRadius: 16,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#EBE5D5',
   },
   checkboxRow: {
     flexDirection: 'row',
@@ -820,28 +717,23 @@ const styles = StyleSheet.create({
   cashTopUpLabel: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#1C1917',
   },
   cashInputRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 10,
-    backgroundColor: '#FFFFFF',
     borderRadius: 10,
     paddingHorizontal: 12,
     borderWidth: 1,
-    borderColor: '#D8D2C2',
     width: 110,
   },
   currencySymbol: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#1C1917',
   },
   cashInput: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#1C1917',
     paddingVertical: 6,
     paddingHorizontal: 6,
     flex: 1,
@@ -852,46 +744,37 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   chipBtn: {
-    backgroundColor: '#E2EFE0',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#CBE4C6',
   },
-  chipTest: {
+  chipText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#166534',
   },
   inputLabel: {
     fontSize: 11,
     fontWeight: '800',
-    color: '#78716C',
     marginTop: 14,
     marginBottom: 6,
     letterSpacing: 0.8,
   },
   messageBox: {
-    backgroundColor: '#E2EFE0',
     borderRadius: 16,
     padding: 14,
     borderWidth: 1,
-    borderColor: '#CBE4C6',
   },
   messageInput: {
     fontSize: 14,
-    color: '#1C1917',
     minHeight: 55,
     textAlignVertical: 'top',
   },
   previewContainer: {
-    backgroundColor: '#EBE5D5',
     borderRadius: 20,
     padding: 16,
     marginTop: 24,
     borderWidth: 1,
-    borderColor: '#DFD8C5',
   },
   previewHeader: {
     flexDirection: 'row',
@@ -901,7 +784,6 @@ const styles = StyleSheet.create({
   previewTitle: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#1C1917',
   },
   previewCardRow: {
     flexDirection: 'row',
@@ -913,30 +795,25 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FAF7EE',
     paddingHorizontal: 12,
     paddingVertical: 10,
     borderRadius: 12,
     gap: 6,
     borderWidth: 1,
-    borderColor: '#E2DBCA',
   },
   previewPillText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#1C1917',
     flex: 1,
   },
   forText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#78716C',
   },
   fairTradeBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#E2EFE0',
     paddingVertical: 6,
     borderRadius: 8,
     marginBottom: 12,
@@ -944,10 +821,8 @@ const styles = StyleSheet.create({
   },
   fairTradeText: {
     fontSize: 12,
-    color: '#166534',
   },
   sendButton: {
-    backgroundColor: '#0F381E',
     borderRadius: 14,
     paddingVertical: 16,
     flexDirection: 'row',
@@ -974,7 +849,6 @@ const styles = StyleSheet.create({
   },
   secureFooterText: {
     fontSize: 11,
-    color: '#78716C',
     fontWeight: '600',
   },
   modalBg: {
@@ -985,7 +859,6 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
     width: '100%',
     borderRadius: 24,
     padding: 24,
@@ -1000,7 +873,6 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#166534',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 14,
@@ -1008,43 +880,35 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#1C1917',
     marginBottom: 6,
     textAlign: 'center',
   },
   modalSub: {
     fontSize: 14,
-    color: '#78716C',
     textAlign: 'center',
     marginBottom: 16,
     lineHeight: 20,
   },
   modalInput: {
     width: '100%',
-    backgroundColor: '#F5F5F4',
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderRadius: 14,
     fontSize: 14,
-    color: '#1C1917',
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#E7E2D0',
   },
   dropdownLabel: {
     alignSelf: 'flex-start',
     fontSize: 12,
     fontWeight: '700',
-    color: '#57534E',
     marginBottom: 6,
   },
   suggestionsContainer: {
     width: '100%',
     maxHeight: 120,
-    backgroundColor: '#FBF9F4',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E7E2D0',
     marginBottom: 14,
     paddingHorizontal: 8,
   },
@@ -1054,24 +918,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 8,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0ECE1',
     gap: 8,
-  },
-  selectedSuggestionItem: {
-    backgroundColor: '#E2EFE0',
-    borderRadius: 8,
   },
   suggestionText: {
     fontSize: 13,
-    color: '#57534E',
     flex: 1,
   },
-  selectedSuggestionText: {
-    color: '#166534',
-    fontWeight: '700',
-  },
   modalBtnPrimary: {
-    backgroundColor: '#0F381E',
     width: '100%',
     paddingVertical: 16,
     borderRadius: 14,
@@ -1090,7 +943,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalBtnSecondaryText: {
-    color: '#78716C',
     fontSize: 14,
     fontWeight: '600',
   },
